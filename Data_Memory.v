@@ -21,13 +21,19 @@ reg [7:0]	memory[31:0];
 
 
 // Write Data   
-always@(clk_i) begin
+always@(posedge clk_i) begin
     if(MEM_signal_i[0])begin
         memory[addr_i] <= data_i[7:0];
-    end
-    if(MEM_signal_i[1])begin
-        data_o <= {24'd0, memory[addr_i]};
-    end
-		
+        memory[addr_i+1] <= data_i[15:8];
+        memory[addr_i+2] <= data_i[23:16];
+        memory[addr_i+3] <= data_i[31:24];
+    end	
 end
+always@(negedge clk_i)begin
+    if(MEM_signal_i[1])begin
+        data_o = {memory[addr_i+3], memory[addr_i+2], memory[addr_i+1], memory[addr_i]};
+    end 
+end
+
+
 endmodule

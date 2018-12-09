@@ -29,9 +29,9 @@ always	@(inst_i) begin
 	case(inst_i[6:0])
 		7'b0000011:	EX_signal_o = 2'b00;	//load
 		7'b0100011:	EX_signal_o = 2'b00;	//store
-		7'b1100011:	EX_signal_o = 2'b10;	//beq
+		7'b1100011:	EX_signal_o = 2'b01;	//beq
 		7'b1100011: EX_signal_o = 2'b11;	// addi
-		default:	EX_signal_o = 2'b00;    //R format
+		default:	EX_signal_o = 2'b10;    //R format
 	endcase
 
 

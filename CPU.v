@@ -15,7 +15,7 @@ wire [31:0] instr_addr;
 Adder Add_PC(
     .stall_i    (HazzardDetectUnit.stall_o),
     .data1_in   (instr_addr),
-    .data2_in   (32'd4),
+    .data2_in   (Flush_Unit.Imm_o),
     .data_o     ()
 );
 
@@ -46,6 +46,7 @@ IF_ID_Reg   IF_ID_Reg(
     .stall_i    (HazzardDetectUnit.stall_o),
     .clk_i     (clk_i),
     .inst_i   (Instruction_Memory.instr_o),
+    .flush_i    (Flush_Unit.If_flush_o),
     .pc_i   (instr_addr),
     .inst_o    (),
     .pc_o   ()
@@ -79,6 +80,9 @@ ID_EX_Reg   ID_EX_Reg(
     .EX_signal_i    (MUX_Control.EX_signal_o),
     .MEM_signal_i   (MUX_Control.MEM_signal_o),
     .WB_signal_i    (MUX_Control.WB_signal_o),
+    .RS2Data_o  (),
+    .ImmData_o  (),
+    .Immsig_o   (),
     .EX_signal_o    (),
     .MEM_signal_o   (),
     .WB_signal_o    (),
@@ -97,7 +101,7 @@ HazzardDetectUnit HazzardDetectUnit(
 
 MUX8 MUX_Control(
     .stall_select_i   (HazzardDetectUnit.stall_o),
-    .flush_select_i   (),
+    .flush_select_i   (Flush_Unit.If_flush_o),
     .EX_signal_i    (Control.EX_signal_o),
     .MEM_signal_i   (Control.MEM_signal_o),
     .WB_signal_i    (Control.WB_signal_o),
@@ -105,6 +109,17 @@ MUX8 MUX_Control(
     .MEM_signal_o   (),
     .WB_signal_o    ()
 );
+
+Flush_Unit Flush_Unit(
+    .EX_signal_i   (Control.EX_signal_o),
+    .Imm_i  ({20'b0, IF_ID_Reg.inst_o[31],IF_ID_Reg.inst_o[7],IF_ID_Reg.inst_o[30:25],IF_ID_Reg.inst_o[11:8]}),
+    .RSdata_i   (Registers.RSdata_o),
+    .RTdata_i   (Registers.RTdata_o), 
+    .If_flush_o (),
+    .Imm_o()
+
+);
+
 
 /*
 Sign_Extend Sign_Extend(
@@ -124,13 +139,23 @@ EX_MUX MUX_RSSrc(
     .data_o     ()
 );
 
-EX_MUX MUX_RTSrc(
-    .dataOrigin_i    (ID_EX_Reg.RTdata_o),      
-    .dataEx_i       (EX_MEM_Reg.ALUResult_o),
-    .dataMem_i      (MUX_WriteBackSrc.data_o),
-    .select_i   (FowardUnit.forwardB_o),
+MUX32  MUX_RTSrc(
+    .data1_i    (ID_EX_Reg.ImmData_o),
+    .data2_i    (MUX_R2Src.data_o),
+    .select_i   (ID_EX_Reg.Immsig_o),
     .data_o     ()
 );
+
+EX_MUX MUX_R2Src(
+    .dataOrigin_i  (ID_EX_Reg.RS2Data_o),
+    .dataEx_i   (EX_MEM_Reg.ALUResult_o),
+    .dataMem_i  (MUX_WriteBackSrc.data_o),
+    .select_i   (FowardUnit.forwardB_o),
+    .data_o     ()
+
+);
+
+
 
 ALU_Control ALU_Control(
     .EX_signal_i    (ID_EX_Reg.EX_signal_o),
@@ -163,7 +188,7 @@ EX_MEM_Reg  EX_MEM_Reg(
     .MEM_signal_i   (ID_EX_Reg.MEM_signal_o),
     .WB_signal_i    (ID_EX_Reg.WB_signal_o),
     .ALUResult_i    (ALU.data_o),
-    .RTdata_i   (ID_EX_Reg.RTdata_o),
+    .RTdata_i   (MUX_R2Src.data_o),
     .inst_o     (),
     .MEM_signal_o   (),
     .WB_signal_o    (),
