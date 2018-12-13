@@ -10,13 +10,16 @@ input               clk_i;
 input               rst_i;
 input               start_i;
 
-wire [31:0] instr_addr;
+wire [31:0] instr_addr, instr, PCIn;
+wire [31:0] RSdataOut, RTdataOut, RDdataIn;
+
+
 
 Adder Add_PC(
     .stall_i    (HazzardDetectUnit.stall_o),
     .data1_in   (instr_addr),
     .data2_in   (Flush_Unit.Imm_o),
-    .data_o     ()
+    .data_o     (PCIn)
 );
 
 
@@ -24,7 +27,7 @@ PC PC(
     .clk_i      (clk_i),
     .rst_i      (rst_i),
     .start_i    (start_i),
-    .pc_i       (Add_PC.data_o),
+    .pc_i       (PCIn),
     .pc_o       (instr_addr)
 );
 
@@ -39,13 +42,13 @@ MUX32 MUX_PCSrc(
 
 Instruction_Memory Instruction_Memory(
     .addr_i     (instr_addr), 
-    .instr_o    ()
+    .instr_o    (instr)
 );
 
 IF_ID_Reg   IF_ID_Reg(
     .stall_i    (HazzardDetectUnit.stall_o),
     .clk_i     (clk_i),
-    .inst_i   (Instruction_Memory.instr_o),
+    .inst_i   (instr),
     .flush_i    (Flush_Unit.If_flush_o),
     .pc_i   (instr_addr),
     .inst_o    (),
@@ -59,10 +62,10 @@ Registers Registers(
     .RSaddr_i   (IF_ID_Reg.inst_o[19:15]),
     .RTaddr_i   (IF_ID_Reg.inst_o[24:20]),
     .RDaddr_i   (MEM_WB_Reg.inst_o[11:7]), 
-    .RDdata_i   (MUX_WriteBackSrc.data_o),
+    .RDdata_i   (RDdataIn),
     .RegWrite_i (MEM_WB_Reg.WB_signal_o), 
-    .RSdata_o   (), 
-    .RTdata_o   () 
+    .RSdata_o   (RSdataOut), 
+    .RTdata_o   (RTdataOut) 
 );
 
 Control Control(
@@ -75,8 +78,8 @@ Control Control(
 ID_EX_Reg   ID_EX_Reg(
     .clk_i      (clk_i),
     .inst_i     (IF_ID_Reg.inst_o),
-    .RSdata_i   (Registers.RSdata_o),
-    .RTdata_i   (Registers.RTdata_o),
+    .RSdata_i   (RSdataOut),
+    .RTdata_i   (RTdataOut),
     .EX_signal_i    (MUX_Control.EX_signal_o),
     .MEM_signal_i   (MUX_Control.MEM_signal_o),
     .WB_signal_i    (MUX_Control.WB_signal_o),
@@ -113,8 +116,8 @@ MUX8 MUX_Control(
 Flush_Unit Flush_Unit(
     .EX_signal_i   (Control.EX_signal_o),
     .Imm_i  ({20'b0, IF_ID_Reg.inst_o[31],IF_ID_Reg.inst_o[7],IF_ID_Reg.inst_o[30:25],IF_ID_Reg.inst_o[11:8]}),
-    .RSdata_i   (Registers.RSdata_o),
-    .RTdata_i   (Registers.RTdata_o), 
+    .RSdata_i   (RSdataOut),
+    .RTdata_i   (RTdataOut), 
     .If_flush_o (),
     .Imm_o()
 
@@ -223,7 +226,7 @@ MUX32 MUX_WriteBackSrc(
     .data1_i    (MEM_WB_Reg.MEMdata_o),
     .data2_i    (MEM_WB_Reg.ALUResult_o),
     .select_i   (MEM_WB_Reg.WB_signal_o[0]),
-    .data_o     ()
+    .data_o     (RDdataIn)
 );
 
 

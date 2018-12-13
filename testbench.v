@@ -64,8 +64,8 @@ always@(posedge Clk) begin
     if(CPU.HazzardDetectUnit.stall_o == 1)stall = stall + 1;
     if(CPU.Flush_Unit.If_flush_o== 1)flush = flush + 1;  
     //$display("HazzardDetectUnit:%b, %b, %b, %b %b\n", CPU.HazzardDetectUnit.MEM_signal_i, CPU.HazzardDetectUnit.RS_addr_i,  CPU.HazzardDetectUnit.RT_addr_i,  CPU.HazzardDetectUnit.RD_addr_i, CPU.HazzardDetectUnit.stall_o);
-    //$display("IF/ID  Reg %b\n", CPU.IF_ID_Reg.inst_i, CPU.IF_ID_Reg.inst_o);
-    //$display("ID/EX  Reg %b\n", CPU.ID_EX_Reg.inst_o);
+    $display("IF/ID  Reg %b\n", CPU.IF_ID_Reg.inst_o);
+    $display("ID/EX  Reg %b\n", CPU.ID_EX_Reg.inst_o);
     //$display("EX/MEM Reg %b\n", CPU.EX_MEM_Reg.inst_o);
     //$display("MEM/WB Reg %b\n", CPU.MEM_WB_Reg.inst_o);
     //$display("rs1:%d, rs2:%d, rd':%d, rd'':%d, regwrite:%d,%d\n", CPU.FowardUnit.ID_EX_RS_i,CPU.FowardUnit.ID_EX_RT_i,CPU.FowardUnit.EX_MEM_RD_i, CPU.FowardUnit.MEM_WB_RD_i, CPU.FowardUnit.EX_MEM_RegWrite_i[1], CPU.FowardUnit.MEM_WB_RegWrite_i[1]);
@@ -73,10 +73,11 @@ always@(posedge Clk) begin
     //$display("EX_MEM_Reg:%d\nData_Mem:%d\n",CPU.EX_MEM_Reg.RTdata_o, CPU.Data_Memory.data_i);
     //$display("MemData:%d\n",CPU.Data_Memory.data_o);
     $display("Registers data RS1:%d,RS2:%d RD:%d\n", CPU.Registers.RSdata_o, CPU.Registers.RTdata_o, CPU.Registers.RDdata_i);
+    $display("Registers addr RS1:%d,RS2:%d RD:%d\n", CPU.Registers.RSaddr_i, CPU.Registers.RTaddr_i, CPU.Registers.RDaddr_i);
     //$display("Stall:%d\n",CPU.MUX_Control.stall_select_i);
     //$display("Control Signal: %b %b %b\n", CPU.MUX_Control.EX_signal_o, CPU.MUX_Control.MEM_signal_o, CPU.MUX_Control.WB_signal_o);
-    //$display("ALUControl :%b, EX_signal: %b, Funt:%b\n", CPU.ALU_Control.ALUCtrl_o, CPU.ALU_Control.EX_signal_i, CPU.ALU_Control.func);
-    //$display("ALU operand1(rs1):%d, operand2(rs2orImm):%d Ans:%d\n", CPU.ALU.data1_i, CPU.ALU.data2_i, CPU.ALU.data_o);
+    $display("ALUControl :%b, EX_signal: %b, Funt:%b\n", CPU.ALU_Control.ALUCtrl_o, CPU.ALU_Control.EX_signal_i, CPU.ALU_Control.func);
+    $display("ALU operand1(rs1):%d, operand2(rs2orImm):%d Ans:%d\n", CPU.ALU.data1_i, CPU.ALU.data2_i, CPU.ALU.data_o);
     $display("ForwardA:%b, ForwardB:%b\n", CPU.FowardUnit.forwardA_o, CPU.FowardUnit.forwardB_o);
 
 

@@ -21,9 +21,9 @@ output reg [1:0] 	WB_signal_o;
 
 always@(stall_select_i or EX_signal_i or MEM_signal_i or WB_signal_i or flush_select_i)begin
 	if (stall_select_i || flush_select_i )begin
-		EX_signal_o <= 2'b00;
-		MEM_signal_o <= 3'b000;
-		WB_signal_o <= 2'b00;
+		EX_signal_o <= 2'bxx;
+		MEM_signal_o <= 3'bxxx;
+		WB_signal_o <= 2'bxx;
 	end
 	else	begin
 		EX_signal_o <= EX_signal_i;
