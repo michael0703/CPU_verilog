@@ -23,10 +23,10 @@ reg [7:0]	memory[31:0];
 // Write Data   
 always@(posedge clk_i) begin
     if(MEM_signal_i[0])begin
-        memory[addr_i] <= data_i[7:0];
-        memory[addr_i+1] <= data_i[15:8];
-        memory[addr_i+2] <= data_i[23:16];
-        memory[addr_i+3] <= data_i[31:24];
+        memory[addr_i] = data_i[7:0];
+        memory[addr_i+1] = data_i[15:8];
+        memory[addr_i+2] = data_i[23:16];
+        memory[addr_i+3] = data_i[31:24];
     end	
 end
 always@(negedge clk_i)begin
